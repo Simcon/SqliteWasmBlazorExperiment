@@ -1,0 +1,73 @@
+﻿@page "/dbtest"
+@rendermode InteractiveWebAssembly
+@using Microsoft.EntityFrameworkCore
+@using SqliteWasmBlazorExperiment.Ef
+@inject IServiceScopeFactory scopeFactory
+
+<PageTitle>Db Test</PageTitle>
+
+<h1>Db Test</h1>
+
+<button class="btn btn-primary" @onclick="Write">Write to DB</button>
+
+@if (items is null)
+{
+    <p class="mt-3 text-muted">Loading...</p>
+}
+else if (items.Count > 0)
+{
+    <ul class="mt-3">
+        @foreach (var item in items)
+        {
+            <li>@item.Title</li>
+        }
+    </ul>
+}
+else
+{
+    <p class="mt-3 text-muted">No items yet. Click the button to add one.</p>
+}
+
+@code {
+    private List<TodoItem>? items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (OperatingSystem.IsBrowser())
+        {
+            await LoadItems();
+        }
+    }
+
+    private async Task LoadItems()
+    {
+        using var scope = scopeFactory.CreateAsyncScope();
+        using var db = scope.ServiceProvider
+            .GetRequiredService<IDbContextFactory<TodoDbContext>>()
+            .CreateDbContext();
+
+        items = await db.TodoItems
+            .OrderByDescending(i => i.Id)
+            .ToListAsync();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Write()
+    {
+        using var scope = scopeFactory.CreateAsyncScope();
+        using var db = scope.ServiceProvider
+            .GetRequiredService<IDbContextFactory<TodoDbContext>>()
+            .CreateDbContext();
+
+        await db.AddAsync(new TodoItem
+        {
+            Title = DateTime.UtcNow.ToString("u"),
+            IsCompleted = false
+        });
+        await db.SaveChangesAsync();
+
+        await LoadItems();
+    }
+
+}

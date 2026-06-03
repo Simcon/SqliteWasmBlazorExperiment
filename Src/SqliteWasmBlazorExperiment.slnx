@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SqliteWasmBlazorExperiment.EF/SqliteWasmBlazorExperiment.EF.csproj" />
+  <Project Path="SqliteWasmBlazorExperiment.Client/SqliteWasmBlazorExperiment.Client.csproj" />
+  <Project Path="SqliteWasmBlazorExperiment/SqliteWasmBlazorExperiment.csproj" />
+</Solution>
